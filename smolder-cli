@@ -37,7 +37,7 @@ def smolder_cli(**kwargs):
     raise
   except yaml.parser.ParserError:
     LOG.exception("Invalid yaml in file %s", kwargs['testfile'])
-    raise
+    sys.exit(2)
   except ValueError:
     LOG.exception("Invalid data in file %s", kwargs['testfile'])
     raise

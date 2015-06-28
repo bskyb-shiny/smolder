@@ -35,8 +35,9 @@ def smolder_cli(**kwargs):
   except IOError:
     LOG.exception("Couldn't open test file %s", kwargs['testfile'])
     raise
-  except yaml.ScannerError:
-    LOG.exception("Invalid data in file %s", kwargs['testfile'])
+  except yaml.parser.ParserError:
+    LOG.exception("Invalid yaml in file %s", kwargs['testfile'])
+    sys.exit(2)
   except ValueError:
     LOG.exception("Invalid data in file %s", kwargs['testfile'])
     raise

@@ -74,6 +74,7 @@ SCHEMA = {
 @arg('host', help='IP address or DNS name to run tests against', default=os.environ.get('TEST_HOST'))
 @arg('testfile', default=os.environ.get('TEST_FILE'), metavar='TEST_FILE', nargs='?', help='The json file that details the tests to execute')
 @arg('--force', help='Use http methods that can potentially change data (PUT, POST, DELETE, etc. ie !GET)', default=False)
+@arg('--port', help='Used to force the port for every test.')
 def smolder_cli(**kwargs):
     """ Parse CLI args and if valid dispatch to lower methods """
     all_tests = []
@@ -117,17 +118,24 @@ def smolder_cli(**kwargs):
     # Iterate through all the tests
 
     for test in test_input['tests']:
-        try:
-            port = test["port"]
-        except (AttributeError, KeyError):
-            print("Warning: No port definition found in the first test, using port 80 as default.")
+        if kwargs['port']:
+            port = kwargs['port']
+        else:
             try:
-                if test["protocol"] == "https":
-                    port = 443
-                else:
-                    port = 80
+                port = test["port"]
             except (AttributeError, KeyError):
-                port = 80
+                print("Warning: No port definition found in the first test, using port 80 as default.")
+                try:
+                    if test["protocol"] == "https":
+                        port = 443
+                    else:
+                        port = 80
+                except (AttributeError, KeyError):
+                    port = 80
+
+        port = int(port)
+        test['port'] = port
+
         tcp_test(str(kwargs['host']), port)
         test_obj = Charcoal(test=test, host=kwargs['host'])
         print(str(test_obj))
